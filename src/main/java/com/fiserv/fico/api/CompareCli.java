@@ -2,10 +2,13 @@ package com.fiserv.fico.api;
 
 import com.fiserv.fico.service.CompareReport;
 import com.fiserv.fico.service.CompareService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fiserv.fico.service.ReportFormat;
+import com.fiserv.fico.service.ReportWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -15,11 +18,11 @@ import org.springframework.stereotype.Component;
 public class CompareCli implements CommandLineRunner {
 
     private final CompareService service;
-    private final ObjectMapper objectMapper;
+    private final ReportWriter reportWriter;
 
-    public CompareCli(CompareService service, ObjectMapper objectMapper) {
+    public CompareCli(CompareService service, ReportWriter reportWriter) {
         this.service = service;
-        this.objectMapper = objectMapper;
+        this.reportWriter = reportWriter;
     }
 
     @Override
@@ -34,16 +37,22 @@ public class CompareCli implements CommandLineRunner {
             return;
         }
 
+        ReportFormat format;
+        try {
+            format = ReportFormat.from(params.get("format"));
+        } catch (IllegalArgumentException ex) {
+            System.err.println(ex.getMessage());
+            return;
+        }
+
+        Optional<Path> outputPath = Optional.ofNullable(params.get("out")).map(Paths::get);
+
         CompareReport report = service.compare(
                 params.get("institutionNumber"),
                 params.get("serviceContract"),
                 params.get("anomes"));
 
-        try {
-            System.out.println(objectMapper.writeValueAsString(report));
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Unable to serialize compare report", e);
-        }
+        reportWriter.write(report, format, outputPath);
     }
 
     private Map<String, String> parseArgs(String[] args) {

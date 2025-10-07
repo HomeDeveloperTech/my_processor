@@ -51,12 +51,15 @@ class CompareControllerTest {
                 .param("anomes", "202401")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.onlyInAlianca", hasSize(1)))
-        .andExpect(jsonPath("$.onlyInAlianca[0].merchantNumber", is("M-ONLY")))
-        .andExpect(jsonPath("$.onlyInAlianca[0].terminalId", is("T-ONLY")))
-        .andExpect(jsonPath("$.onlyInAlianca[0].valorCorrigido", is(100.50)))
-        .andExpect(jsonPath("$.onlyInExcecao", hasSize(0)))
-        .andExpect(jsonPath("$.divergent", hasSize(0)));
+        .andExpect(jsonPath("$.onlyInAlianca.totalElements", is(1)))
+        .andExpect(jsonPath("$.onlyInAlianca.content", hasSize(1)))
+        .andExpect(jsonPath("$.onlyInAlianca.content[0].merchantNumber", is("M-ONLY")))
+        .andExpect(jsonPath("$.onlyInAlianca.content[0].terminalId", is("T-ONLY")))
+        .andExpect(jsonPath("$.onlyInAlianca.content[0].valorCorrigido", is(100.50)))
+        .andExpect(jsonPath("$.onlyInExcecao.totalElements", is(0)))
+        .andExpect(jsonPath("$.onlyInExcecao.content", hasSize(0)))
+        .andExpect(jsonPath("$.divergent.totalElements", is(0)))
+        .andExpect(jsonPath("$.divergent.content", hasSize(0)));
   }
 
   @Test
@@ -72,12 +75,15 @@ class CompareControllerTest {
                 .param("anomes", "202401")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.onlyInAlianca", hasSize(0)))
-        .andExpect(jsonPath("$.onlyInExcecao", hasSize(1)))
-        .andExpect(jsonPath("$.onlyInExcecao[0].merchantNumber", is("M-ONLY")))
-        .andExpect(jsonPath("$.onlyInExcecao[0].dataValue", is("D-ONLY")))
-        .andExpect(jsonPath("$.onlyInExcecao[0].valRental", is(200.75)))
-        .andExpect(jsonPath("$.divergent", hasSize(0)));
+        .andExpect(jsonPath("$.onlyInAlianca.totalElements", is(0)))
+        .andExpect(jsonPath("$.onlyInAlianca.content", hasSize(0)))
+        .andExpect(jsonPath("$.onlyInExcecao.totalElements", is(1)))
+        .andExpect(jsonPath("$.onlyInExcecao.content", hasSize(1)))
+        .andExpect(jsonPath("$.onlyInExcecao.content[0].merchantNumber", is("M-ONLY")))
+        .andExpect(jsonPath("$.onlyInExcecao.content[0].dataValue", is("D-ONLY")))
+        .andExpect(jsonPath("$.onlyInExcecao.content[0].valRental", is(200.75)))
+        .andExpect(jsonPath("$.divergent.totalElements", is(0)))
+        .andExpect(jsonPath("$.divergent.content", hasSize(0)));
   }
 
   @Test
@@ -95,33 +101,49 @@ class CompareControllerTest {
                 .param("anomes", "202401")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.onlyInAlianca", hasSize(0)))
-        .andExpect(jsonPath("$.onlyInExcecao", hasSize(0)))
-        .andExpect(jsonPath("$.divergent", hasSize(1)))
-        .andExpect(jsonPath("$.divergent[0].key.institution", is("001")))
-        .andExpect(jsonPath("$.divergent[0].key.service", is("S1")))
-        .andExpect(jsonPath("$.divergent[0].key.anomes", is("202401")))
-        .andExpect(jsonPath("$.divergent[0].diffs", hasSize(3)))
-        .andExpect(jsonPath("$.divergent[0].diffs[?(@.field=='merchantNumber')]", hasSize(1)))
-        .andExpect(jsonPath("$.divergent[0].diffs[?(@.field=='terminalId')]", hasSize(1)))
-        .andExpect(jsonPath("$.divergent[0].diffs[?(@.field=='valorCorrigido')]", hasSize(1)))
+        .andExpect(jsonPath("$.onlyInAlianca.totalElements", is(0)))
+        .andExpect(jsonPath("$.onlyInAlianca.content", hasSize(0)))
+        .andExpect(jsonPath("$.onlyInExcecao.totalElements", is(0)))
+        .andExpect(jsonPath("$.onlyInExcecao.content", hasSize(0)))
+        .andExpect(jsonPath("$.divergent.totalElements", is(1)))
+        .andExpect(jsonPath("$.divergent.content", hasSize(1)))
+        .andExpect(jsonPath("$.divergent.content[0].key.institution", is("001")))
+        .andExpect(jsonPath("$.divergent.content[0].key.service", is("S1")))
+        .andExpect(jsonPath("$.divergent.content[0].key.anomes", is("202401")))
+        .andExpect(jsonPath("$.divergent.content[0].diffs", hasSize(3)))
         .andExpect(
             jsonPath(
-                "$.divergent[0].diffs[?(@.field=='merchantNumber')].leftValue", contains("M-ALI")))
+                "$.divergent.content[0].diffs[?(@.field=='merchantNumber')]",
+                hasSize(1)))
+        .andExpect(
+            jsonPath("$.divergent.content[0].diffs[?(@.field=='terminalId')]", hasSize(1)))
         .andExpect(
             jsonPath(
-                "$.divergent[0].diffs[?(@.field=='merchantNumber')].rightValue", contains("M-EXC")))
-        .andExpect(
-            jsonPath("$.divergent[0].diffs[?(@.field=='terminalId')].leftValue", contains("T-ALI")))
-        .andExpect(
-            jsonPath(
-                "$.divergent[0].diffs[?(@.field=='terminalId')].rightValue", contains("D-EXC")))
+                "$.divergent.content[0].diffs[?(@.field=='valorCorrigido')]",
+                hasSize(1)))
         .andExpect(
             jsonPath(
-                "$.divergent[0].diffs[?(@.field=='valorCorrigido')].leftValue", contains("300.00")))
+                "$.divergent.content[0].diffs[?(@.field=='merchantNumber')].leftValue",
+                contains("M-ALI")))
         .andExpect(
             jsonPath(
-                "$.divergent[0].diffs[?(@.field=='valorCorrigido')].rightValue",
+                "$.divergent.content[0].diffs[?(@.field=='merchantNumber')].rightValue",
+                contains("M-EXC")))
+        .andExpect(
+            jsonPath(
+                "$.divergent.content[0].diffs[?(@.field=='terminalId')].leftValue",
+                contains("T-ALI")))
+        .andExpect(
+            jsonPath(
+                "$.divergent.content[0].diffs[?(@.field=='terminalId')].rightValue",
+                contains("D-EXC")))
+        .andExpect(
+            jsonPath(
+                "$.divergent.content[0].diffs[?(@.field=='valorCorrigido')].leftValue",
+                contains("300.00")))
+        .andExpect(
+            jsonPath(
+                "$.divergent.content[0].diffs[?(@.field=='valorCorrigido')].rightValue",
                 contains("400.00")));
   }
 

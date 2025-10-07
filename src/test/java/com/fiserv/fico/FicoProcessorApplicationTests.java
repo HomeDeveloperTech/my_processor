@@ -8,6 +8,5 @@ class FicoProcessorApplicationTests {
 
     @Test
     void contextLoads() {
-        // Context load test
     }
 }

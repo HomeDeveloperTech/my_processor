@@ -5,6 +5,6 @@ import com.fiserv.fico.domain.AluguelProcessamentoAlianca;
 import java.util.List;
 
 public record CompareReport(
-        List<AluguelProcessamentoAlianca> onlyInAlianca,
-        List<AluguelExcecao> onlyInExcecao,
-        List<DivergentRecord> divergent) {}
+    List<AluguelProcessamentoAlianca> onlyInAlianca,
+    List<AluguelExcecao> onlyInExcecao,
+    List<DivergentRecord> divergent) {}

@@ -5,6 +5,8 @@ import com.fiserv.fico.domain.AluguelProcessamentoAlianca;
 import com.fiserv.fico.repository.AluguelExcecaoRepository;
 import com.fiserv.fico.repository.AluguelProcessamentoAliancaRepository;
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -12,10 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CompareService {
+
+    private static final Logger log = LoggerFactory.getLogger(CompareService.class);
 
     private final AluguelProcessamentoAliancaRepository aliancaRepository;
     private final AluguelExcecaoRepository excecaoRepository;
@@ -28,8 +34,30 @@ public class CompareService {
     }
 
     public CompareReport compare(String institution, String service, String anomes) {
+        Instant start = Instant.now();
+        log.info(
+                "event=compare_start institution={} service={} anomes={}",
+                institution,
+                service,
+                anomes);
+
+        Instant aliancaFetchStart = Instant.now();
         var alianca = aliancaRepository.findForCompare(institution, service, anomes);
+        long aliancaFetchDuration = Duration.between(aliancaFetchStart, Instant.now()).toMillis();
+        log.info(
+                "event=repository_fetch source=alianca records={} durationMs={}",
+                alianca.size(),
+                aliancaFetchDuration);
+
+        Instant excecaoFetchStart = Instant.now();
         var excecao = excecaoRepository.findForCompare(institution, service, anomes);
+        long excecaoFetchDuration = Duration.between(excecaoFetchStart, Instant.now()).toMillis();
+        log.info(
+                "event=repository_fetch source=excecao records={} durationMs={}",
+                excecao.size(),
+                excecaoFetchDuration);
+
+        Instant comparisonStart = Instant.now();
 
         Map<CompareKey, AluguelProcessamentoAlianca> aliancaByKey = indexAlianca(alianca);
         Map<CompareKey, AluguelExcecao> excecaoByKey = indexExcecao(excecao);
@@ -43,6 +71,16 @@ public class CompareService {
                 .toList();
 
         List<DivergentRecord> divergent = buildDivergentRecords(aliancaByKey, excecaoByKey);
+
+        long comparisonDuration = Duration.between(comparisonStart, Instant.now()).toMillis();
+        long totalDuration = Duration.between(start, Instant.now()).toMillis();
+        log.info(
+                "event=compare_finish onlyInAlianca={} onlyInExcecao={} divergent={} comparisonDurationMs={} totalDurationMs={}",
+                onlyInAlianca.size(),
+                onlyInExcecao.size(),
+                divergent.size(),
+                comparisonDuration,
+                totalDuration);
 
         return new CompareReport(onlyInAlianca, onlyInExcecao, divergent);
     }

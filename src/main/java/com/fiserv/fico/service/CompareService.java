@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,10 +55,10 @@ public class CompareService {
     Map<CompareKey, AluguelExcecao> excecaoByKey = indexExcecao(excecao);
 
     List<AluguelProcessamentoAlianca> onlyInAlianca =
-        alianca.stream().filter(a -> !excecaoByKey.containsKey(keyOf(a))).toList();
+        alianca.stream().filter(a -> !excecaoByKey.containsKey(keyOf(a))).collect(Collectors.toList());
 
     List<AluguelExcecao> onlyInExcecao =
-        excecao.stream().filter(e -> !aliancaByKey.containsKey(keyOf(e))).toList();
+        excecao.stream().filter(e -> !aliancaByKey.containsKey(keyOf(e))).collect(Collectors.toList());
 
     List<DivergentRecord> divergent = buildDivergentRecords(aliancaByKey, excecaoByKey);
 
@@ -111,12 +113,12 @@ public class CompareService {
                 toStringOrNull(excecao.getMerchantNumber())));
       }
 
-      if (!Objects.equals(alianca.getTerminalId(), excecao.getDataValue())) {
+      if (!Objects.equals(alianca.getTerminalId(), excecao.getTerminalId())) {
         diffs.add(
             new ValueDiff(
                 "terminalId",
                 toStringOrNull(alianca.getTerminalId()),
-                toStringOrNull(excecao.getDataValue())));
+                toStringOrNull(excecao.getTerminalId())));
       }
 
       if (!equalBigDecimal(alianca.getValorCorrigido(), excecao.getValRental())) {
@@ -141,7 +143,7 @@ public class CompareService {
 
   private CompareKey keyOf(AluguelExcecao excecao) {
     return new CompareKey(
-        excecao.getInstitutionNumber(), excecao.getServiceContract(), excecao.getAnoMes());
+        excecao.getInstitutionNumber(), excecao.getServiceContract(), excecao.getAnomes());
   }
 
   private boolean equalBigDecimal(BigDecimal left, BigDecimal right) {

@@ -43,10 +43,14 @@ public class ReportWriter {
   }
 
   String serialize(CompareReport report, ReportFormat format) {
-    return switch (format) {
-      case CSV -> toCsv(report);
-      case JSON -> toJson(report);
-    };
+    switch (format) {
+      case CSV:
+        return toCsv(report);
+      case JSON:
+        return toJson(report);
+      default:
+        throw new IllegalArgumentException("Unsupported format: " + format);
+    }
   }
 
   private String toJson(CompareReport report) {
@@ -116,11 +120,11 @@ public class ReportWriter {
           .append(',')
           .append(csvValue(registro.getServiceContract()))
           .append(',')
-          .append(csvValue(registro.getAnoMes()))
+          .append(csvValue(registro.getAnomes()))
           .append(',')
           .append(csvValue(registro.getMerchantNumber()))
           .append(',')
-          .append(csvValue(registro.getDataValue()))
+          .append(csvValue(registro.getTerminalId()))
           .append(',')
           .append(csvValue(registro.getValRental()))
           .append(lineSeparator);
@@ -173,7 +177,13 @@ public class ReportWriter {
     if (value == null) {
       return "";
     }
-    String text = value instanceof BigDecimal bd ? bd.toPlainString() : value.toString();
+    String text;
+    if (value instanceof BigDecimal) {
+      BigDecimal bd = (BigDecimal) value;
+      text = bd.toPlainString();
+    } else {
+      text = value.toString();
+    }
     boolean needsQuotes =
         text.contains(",") || text.contains("\"") || text.contains("\n") || text.contains("\r");
     if (text.contains("\"")) {

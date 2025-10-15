@@ -80,7 +80,7 @@ class CompareControllerTest {
         .andExpect(jsonPath("$.onlyInExcecao.totalElements", is(1)))
         .andExpect(jsonPath("$.onlyInExcecao.content", hasSize(1)))
         .andExpect(jsonPath("$.onlyInExcecao.content[0].merchantNumber", is("M-ONLY")))
-        .andExpect(jsonPath("$.onlyInExcecao.content[0].dataValue", is("D-ONLY")))
+        .andExpect(jsonPath("$.onlyInExcecao.content[0].terminalId", is("D-ONLY")))
         .andExpect(jsonPath("$.onlyInExcecao.content[0].valRental", is(200.75)))
         .andExpect(jsonPath("$.divergent.totalElements", is(0)))
         .andExpect(jsonPath("$.divergent.content", hasSize(0)));
@@ -174,9 +174,9 @@ class CompareControllerTest {
     AluguelExcecao entity = new AluguelExcecao();
     entity.setInstitutionNumber(institution);
     entity.setServiceContract(service);
-    entity.setAnoMes(anomes);
+    entity.setAnomes(anomes);
     entity.setMerchantNumber(merchant);
-    entity.setDataValue(dataValue);
+    entity.setTerminalId(dataValue);
     entity.setValRental(valor);
     return entity;
   }

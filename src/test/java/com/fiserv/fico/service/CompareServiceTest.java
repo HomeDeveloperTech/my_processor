@@ -63,7 +63,7 @@ class CompareServiceTest {
         .satisfies(
             record -> {
               assertThat(record.getMerchantNumber()).isEqualTo("M-ONLY");
-              assertThat(record.getDataValue()).isEqualTo("D-ONLY");
+              assertThat(record.getTerminalId()).isEqualTo("D-ONLY");
               assertThat(record.getValRental()).isEqualByComparingTo("200.75");
             });
     assertThat(report.onlyInAlianca()).isEmpty();
@@ -124,9 +124,9 @@ class CompareServiceTest {
     AluguelExcecao entity = new AluguelExcecao();
     entity.setInstitutionNumber(institution);
     entity.setServiceContract(service);
-    entity.setAnoMes(anomes);
+    entity.setAnomes(anomes);
     entity.setMerchantNumber(merchant);
-    entity.setDataValue(dataValue);
+    entity.setTerminalId(dataValue);
     entity.setValRental(valor);
     return entity;
   }

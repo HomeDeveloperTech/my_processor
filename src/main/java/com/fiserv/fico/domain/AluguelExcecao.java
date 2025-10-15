@@ -1,11 +1,9 @@
 package com.fiserv.fico.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,29 +17,39 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "ALUGUEL_EXCECAO")
-@Table(name = "ALUGUEL_EXCECAO", schema = "#{app.oracle.schema}")
+@Table(name = "ALUGUEL_EXCECAO", schema = "UAT_FICOIPB")
 public class AluguelExcecao {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "ID")
-  private Long id;
-
-  @Column(name = "INSTITUTION_NUMBER", nullable = false)
-  private String institutionNumber;
-
-  @Column(name = "SERVICE_CONTRACT", nullable = false)
-  private String serviceContract;
-
-  @Column(name = "ANO_MES", nullable = false)
-  private String anoMes;
-
-  @Column(name = "MERCHANT_NUMBER")
-  private String merchantNumber;
-
-  @Column(name = "DATA_VALUE")
-  private String dataValue;
+  @EmbeddedId
+  private AluguelId id;
 
   @Column(name = "VAL_RENTAL")
   private BigDecimal valRental;
+
+  // Convenience accessors to keep existing code working
+  public String getInstitutionNumber() { return id != null ? id.getInstitutionNumber() : null; }
+  public void setInstitutionNumber(String institutionNumber) {
+    if (this.id == null) this.id = new AluguelId();
+    this.id.setInstitutionNumber(institutionNumber);
+  }
+  public String getServiceContract() { return id != null ? id.getServiceContract() : null; }
+  public void setServiceContract(String serviceContract) {
+    if (this.id == null) this.id = new AluguelId();
+    this.id.setServiceContract(serviceContract);
+  }
+  public String getAnomes() { return id != null ? id.getAnomes() : null; }
+  public void setAnomes(String anomes) {
+    if (this.id == null) this.id = new AluguelId();
+    this.id.setAnomes(anomes);
+  }
+  public String getMerchantNumber() { return id != null ? id.getMerchantNumber() : null; }
+  public void setMerchantNumber(String merchantNumber) {
+    if (this.id == null) this.id = new AluguelId();
+    this.id.setMerchantNumber(merchantNumber);
+  }
+  public String getTerminalId() { return id != null ? id.getTerminalId() : null; }
+  public void setTerminalId(String terminalId) {
+    if (this.id == null) this.id = new AluguelId();
+    this.id.setTerminalId(terminalId);
+  }
 }

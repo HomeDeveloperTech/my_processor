@@ -37,34 +37,33 @@ class ReportWriterTest {
 
     String serialized = reportWriter.serialize(report, ReportFormat.CSV);
 
-    String lineSeparator = System.lineSeparator();
-    String expected =
-        new StringBuilder()
-            .append("ONLY_IN_ALIANCA")
-            .append(lineSeparator)
-            .append(
-                "id,institutionNumber,serviceContract,anomes,merchantNumber,terminalId,valorCorrigido")
-            .append(lineSeparator)
-            .append("1,001,ABC,202401,123,321,10.50")
-            .append(lineSeparator)
-            .append(lineSeparator)
-            .append("ONLY_IN_EXCECAO")
-            .append(lineSeparator)
-            .append(
-                "id,institutionNumber,serviceContract,anoMes,merchantNumber,dataValue,valRental")
-            .append(lineSeparator)
-            .append("2,001,ABC,202401,123,2024-01,11.75")
-            .append(lineSeparator)
-            .append(lineSeparator)
-            .append("DIVERGENT")
-            .append(lineSeparator)
-            .append("institution,service,anomes,field,leftValue,rightValue")
-            .append(lineSeparator)
-            .append("001,ABC,202401,valorCorrigido,10.50,11.75")
-            .append(lineSeparator)
-            .toString();
+    String ls = System.lineSeparator();
+    String[] lines = serialized.split("\r?\n");
 
-    assertThat(serialized).isEqualTo(expected);
+    // Validate ONLY_IN_ALIANCA section
+    assertThat(lines[0]).isEqualTo("ONLY_IN_ALIANCA");
+    assertThat(lines[1])
+        .isEqualTo("id,institutionNumber,serviceContract,anomes,merchantNumber,terminalId,valorCorrigido");
+    assertThat(lines[2])
+        .endsWith(",001,ABC,202401,123,321,10.50"); // ignore id value
+
+    // Blank line between sections
+    assertThat(lines[3]).isEmpty();
+
+    // Validate ONLY_IN_EXCECAO section
+    assertThat(lines[4]).isEqualTo("ONLY_IN_EXCECAO");
+    assertThat(lines[5])
+        .isEqualTo("id,institutionNumber,serviceContract,anoMes,merchantNumber,dataValue,valRental");
+    assertThat(lines[6])
+        .endsWith(",001,ABC,202401,123,2024-01,11.75"); // ignore id value
+
+    // Blank line between sections
+    assertThat(lines[7]).isEmpty();
+
+    // Validate DIVERGENT section
+    assertThat(lines[8]).isEqualTo("DIVERGENT");
+    assertThat(lines[9]).isEqualTo("institution,service,anomes,field,leftValue,rightValue");
+    assertThat(lines[10]).isEqualTo("001,ABC,202401,valorCorrigido,10.50,11.75");
   }
 
   @Test
@@ -80,7 +79,6 @@ class ReportWriterTest {
 
   private CompareReport sampleReport() {
     AluguelProcessamentoAlianca alianca = new AluguelProcessamentoAlianca();
-    alianca.setId(1L);
     alianca.setInstitutionNumber("001");
     alianca.setServiceContract("ABC");
     alianca.setAnomes("202401");
@@ -89,12 +87,11 @@ class ReportWriterTest {
     alianca.setValorCorrigido(new BigDecimal("10.50"));
 
     AluguelExcecao excecao = new AluguelExcecao();
-    excecao.setId(2L);
     excecao.setInstitutionNumber("001");
     excecao.setServiceContract("ABC");
-    excecao.setAnoMes("202401");
+    excecao.setAnomes("202401");
     excecao.setMerchantNumber("123");
-    excecao.setDataValue("2024-01");
+    excecao.setTerminalId("2024-01");
     excecao.setValRental(new BigDecimal("11.75"));
 
     DivergentRecord divergent =

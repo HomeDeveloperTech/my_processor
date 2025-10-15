@@ -45,9 +45,9 @@ class AluguelExcecaoRepositoryTest {
     AluguelExcecao entity = new AluguelExcecao();
     entity.setInstitutionNumber(institution);
     entity.setServiceContract(service);
-    entity.setAnoMes(anomes);
+    entity.setAnomes(anomes);
     entity.setMerchantNumber(merchant);
-    entity.setDataValue(dataValue);
+    entity.setTerminalId(dataValue);
     entity.setValRental(valor);
     entityManager.persistAndFlush(entity);
   }

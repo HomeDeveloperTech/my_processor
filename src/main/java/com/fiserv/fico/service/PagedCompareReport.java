@@ -3,11 +3,19 @@ package com.fiserv.fico.service;
 import com.fiserv.fico.domain.AluguelExcecao;
 import com.fiserv.fico.domain.AluguelProcessamentoAlianca;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-public record PagedCompareReport(
-    PagedSection<AluguelProcessamentoAlianca> onlyInAlianca,
-    PagedSection<AluguelExcecao> onlyInExcecao,
-    PagedSection<DivergentRecord> divergent) {
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+public class PagedCompareReport {
+  private PagedSection<AluguelProcessamentoAlianca> onlyInAlianca;
+  private PagedSection<AluguelExcecao> onlyInExcecao;
+  private PagedSection<DivergentRecord> divergent;
 
   public static PagedCompareReport from(CompareReport report, int page, int size) {
     return new PagedCompareReport(
@@ -15,6 +23,11 @@ public record PagedCompareReport(
         paginate(report.onlyInExcecao(), page, size),
         paginate(report.divergent(), page, size));
   }
+
+  // Preserve record-style accessors
+  public PagedSection<AluguelProcessamentoAlianca> onlyInAlianca() { return onlyInAlianca; }
+  public PagedSection<AluguelExcecao> onlyInExcecao() { return onlyInExcecao; }
+  public PagedSection<DivergentRecord> divergent() { return divergent; }
 
   private static <T> PagedSection<T> paginate(List<T> items, int page, int size) {
     if (size <= 0) {

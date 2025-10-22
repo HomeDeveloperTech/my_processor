@@ -1,5 +1,4 @@
 package com.fiserv.fico.repository;
-
 import com.fiserv.fico.domain.AluguelId;
 import com.fiserv.fico.domain.AluguelProcessamentoAlianca;
 import java.math.BigDecimal;
@@ -24,4 +23,8 @@ public interface AluguelProcessamentoAliancaRepository
          "where a.id.serviceContract = :service and a.id.anomes = :anomes")
   BigDecimal sumValorCorrigidoByServiceContractAndAnomes(@Param("service") String service,
                                                          @Param("anomes") String anomes);
+
+  @Query("select a from ALUGUEL_PROCESSAMENTO_ALIANCA a where a.id.serviceContract = :service and a.id.anomes = :anomes")
+  List<AluguelProcessamentoAlianca> findByServiceContractAndAnomes(@Param("service") String service,
+                                                                   @Param("anomes") String anomes);
 }

@@ -25,15 +25,15 @@ public class AluguelId implements Serializable {
   @Column(name = "INSTITUTION_NUMBER", nullable = false)
   private String institutionNumber;
 
-  @Column(name = "SERVICE_CONTRACT", nullable = false)
+  @Column(name = "SERVICE_CONTRACT_ID", nullable = false)
   private String serviceContract;
 
   @Column(name = "ANOMES", nullable = false)
   private String anomes;
 
-  @Column(name = "MERCHANT_NUMBER")
+  @Column(name = "MERCHANT_NUMBER", nullable = false)
   private String merchantNumber;
 
-  @Column(name = "TERMINAL_ID")
+  @Column(name = "TERMINAL_ID", nullable = false)
   private String terminalId;
 }

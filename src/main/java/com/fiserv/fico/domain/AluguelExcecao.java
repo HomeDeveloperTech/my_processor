@@ -23,7 +23,7 @@ public class AluguelExcecao {
   @EmbeddedId
   private AluguelId id;
 
-  @Column(name = "VAL_RENTAL")
+  @Column(name = "VALOR_EXCECAO")
   private BigDecimal valRental;
 
   // Convenience accessors to keep existing code working

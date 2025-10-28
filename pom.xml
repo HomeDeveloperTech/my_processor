@@ -62,7 +62,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -185,6 +185,19 @@
                 <spring.profiles.active>test</spring.profiles.active>
                 <spring-boot.run.profiles>test</spring-boot.run.profiles>
             </properties>
+        </profile>
+        <profile>
+            <id>h2</id>
+            <properties>
+                <spring.profiles.active>h2</spring.profiles.active>
+                <spring-boot.run.profiles>h2</spring-boot.run.profiles>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 

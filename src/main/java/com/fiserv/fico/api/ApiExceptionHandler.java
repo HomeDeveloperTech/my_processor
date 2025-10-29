@@ -1,7 +1,7 @@
 package com.fiserv.fico.api;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;

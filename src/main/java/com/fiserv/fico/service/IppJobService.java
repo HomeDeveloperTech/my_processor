@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,7 +70,7 @@ public class IppJobService {
       Path out = tempDir.resolve(id.toString() + ".xlsx");
       // create initial empty workbook for partial download
       try (XSSFWorkbook init = new XSSFWorkbook()) {
-        Files.newOutputStream(out).write(toBytes(init));
+        publish(out, init);
       }
       registry.put(id, JobStatus.RUNNING, out.toString(), null);
 
@@ -111,6 +112,8 @@ public class IppJobService {
         for (int i = 0; i < cols.length; i++) {
           header.createCell(i).setCellValue(cols[i]);
         }
+        // publish after creating header so partials are always a valid workbook
+        publish(out, wb);
 
         for (String sc : contracts) {
           BigDecimal totalM = aliancaRepo.sumValorCorrigidoByServiceContractAndAnomes(sc, anomesM);
@@ -165,10 +168,12 @@ public class IppJobService {
           for (int i = 0; i < aCols.length; i++) {
             ana.autoSizeColumn(i);
           }
+          // publish after each cycle (one service contract block completed)
+          publish(out, wb);
         }
         for (int i = 0; i < 10; i++) cons.autoSizeColumn(i);
-
-        Files.newOutputStream(out).write(toBytes(wb));
+        // final publish after autosize
+        publish(out, wb);
       }
 
       registry.put(id, JobStatus.DONE, out.toString(), null);
@@ -204,6 +209,21 @@ public class IppJobService {
     try (java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream()) {
       wb.write(bos);
       return bos.toByteArray();
+    }
+  }
+
+  // Publish the workbook safely: write to a temp file then atomically replace the visible file.
+  private void publish(Path out, XSSFWorkbook wb) throws IOException {
+    Path dir = out.getParent();
+    if (dir != null && !Files.exists(dir)) {
+      Files.createDirectories(dir);
+    }
+    Path tmp = (dir == null ? Path.of(".") : dir).resolve(out.getFileName().toString() + ".tmp");
+    Files.write(tmp, toBytes(wb));
+    try {
+      Files.move(tmp, out, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    } catch (java.nio.file.AtomicMoveNotSupportedException ex) {
+      Files.move(tmp, out, StandardCopyOption.REPLACE_EXISTING);
     }
   }
 

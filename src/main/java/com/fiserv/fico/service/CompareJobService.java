@@ -6,6 +6,7 @@ import com.fiserv.fico.repository.AluguelOrigemRepository;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -68,7 +69,7 @@ public class CompareJobService {
       Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
       Path out = tempDir.resolve(id.toString() + ".xlsx");
       try (XSSFWorkbook init = new XSSFWorkbook()) {
-        Files.newOutputStream(out).write(toBytes(init));
+        publish(out, init);
       }
       registry.put(id, JobStatus.RUNNING, out.toString(), null);
 
@@ -125,11 +126,14 @@ public class CompareJobService {
       // Write XLSX (final or updated partial)
       try (XSSFWorkbook wb = new XSSFWorkbook()) {
         writeConsolidationSheet(wb, consolidado);
+        // publish after consolidation to allow partial download updated
+        publish(out, wb);
         // Per-alianca sheets with all AluguelOrigem columns
         for (Map.Entry<String, List<AluguelOrigem>> e : byAlianca.entrySet()) {
           writeAliancaSheet(wb, e.getKey(), e.getValue(), mmaa);
+          // publish after each alianca sheet to avoid long gaps and reduce concurrency window
+          publish(out, wb);
         }
-        Files.newOutputStream(out).write(toBytes(wb));
       }
       registry.put(id, JobStatus.DONE, out.toString(), null);
     } catch (Exception ex) {
@@ -142,6 +146,21 @@ public class CompareJobService {
     try (java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream()) {
       wb.write(bos);
       return bos.toByteArray();
+    }
+  }
+
+  // Publish the workbook safely for readers: write to a temp file and atomically replace the target.
+  private void publish(Path out, XSSFWorkbook wb) throws IOException {
+    Path dir = out.getParent();
+    if (dir != null && !Files.exists(dir)) {
+      Files.createDirectories(dir);
+    }
+    Path tmp = (dir == null ? Path.of(".") : dir).resolve(out.getFileName().toString() + ".tmp");
+    Files.write(tmp, toBytes(wb));
+    try {
+      Files.move(tmp, out, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    } catch (java.nio.file.AtomicMoveNotSupportedException ex) {
+      Files.move(tmp, out, StandardCopyOption.REPLACE_EXISTING);
     }
   }
 
